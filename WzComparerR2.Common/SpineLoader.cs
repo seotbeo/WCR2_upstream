@@ -19,10 +19,16 @@ namespace WzComparerR2.Common
             }
             if (!atlasNode.Text.EndsWith(AtlasExtension))
             {
-                return SpineDetectionResult.Failed($"AtlasNode name has no suffix {AtlasExtension}.");
+                //return SpineDetectionResult.Failed($"AtlasNode name has no suffix {AtlasExtension}.");
             }
 
-            string spineName = atlasNode.Text.Substring(0, atlasNode.Text.Length - AtlasExtension.Length);
+            string spineName;
+            if (atlasNode.spine == null)
+            {
+                spineName = atlasNode.Text.Substring(0, atlasNode.Text.Length - AtlasExtension.Length);
+            }
+            else spineName = atlasNode.spine;
+
             Wz_Node parentNode = atlasNode.ParentNode;
             SkeletonLoadType loadType;
             SpineVersion spineVersion;

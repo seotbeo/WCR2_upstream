@@ -75,7 +75,30 @@ namespace WzComparerR2.MapRender
             }
 
             //特殊处理
+            if (holder.Resource is not T)
+            {
+                if (typeof(T) == typeof(TextureAtlas) && holder.Resource is Texture2D)
+                {
+                    var ta = toTA((Texture2D)holder.Resource);
+                    return (T)ta;
+                }
+                else if (typeof(T) == typeof(Texture2D) && holder.Resource is TextureAtlas)
+                {
+                    return (T)toT2d((TextureAtlas)holder.Resource);
+                }
+            }
+            
             return (T)holder.Resource;
+        }
+
+        private object toTA(Texture2D texture)
+        {
+            return new TextureAtlas(texture);
+        }
+
+        private object toT2d(TextureAtlas ta)
+        {
+            return ta.Texture;
         }
 
         public object LoadAnimationData(Wz_Node node)
@@ -348,6 +371,29 @@ namespace WzComparerR2.MapRender
                         }
                         var repeat = node.Nodes["repeat"].GetValueEx<bool>();
                         return new RepeatableFrameAnimationData(frames) { Repeat = repeat };
+                    }
+                }
+                else if (node.Text.Contains(".skel"))
+                {
+                    string spine = node.Text;
+                    var pn = node.ParentNode;
+
+                    var textureLoader = new SpineTextureLoader(this, pn);
+                    var atlasNode = pn.Nodes["atlas"];
+                    atlasNode.spine = spine.Substring(0, spine.Length - 5);
+
+                    var detectionResult = SpineLoader.Detect(atlasNode);
+                    if (detectionResult.Success)
+                    {
+                        if (detectionResult.Version == SpineVersion.V2)
+                        {
+                            return SpineAnimationDataV2.CreateFromNode(atlasNode, textureLoader);
+                        }
+                        else if (detectionResult.Version == SpineVersion.V4)
+                        {
+                            return SpineAnimationDataV4.CreateFromNode(atlasNode, textureLoader);
+                        }
+                        return null;
                     }
                 }
             }

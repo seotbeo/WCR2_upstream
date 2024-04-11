@@ -26,6 +26,7 @@ namespace WzComparerR2.WzLib
         private string text;
         private WzNodeCollection nodes;
         private Wz_Node parentNode;
+        public string spine;
 
         //properties
         public object Value
